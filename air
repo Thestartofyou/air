@@ -1,0 +1,44 @@
+import requests
+import time
+
+# Constants
+API_KEY = 'your_airvisual_api_key'  # Replace with your AirVisual API key
+CITY = 'Boston'                      # Replace with your city
+STATE = 'Massachusetts'              # Replace with your state
+COUNTRY = 'USA'                      # Replace with your country
+UNHEALTHY_THRESHOLD = 100            # AQI level considered unhealthy
+
+def get_air_quality(city, state, country):
+    url = f'http://api.airvisual.com/v2/city?city={city}&state={state}&country={country}&key={API_KEY}'
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        if 'data' in data:
+            aqi = data['data']['current']['pollution']['aqius']
+            return aqi
+        else:
+            print("Error: No data found for the specified location.")
+            return None
+    else:
+        print(f"Error: Unable to retrieve data. Status code {response.status_code}")
+        return None
+
+def alert_user(aqi):
+    if aqi >= UNHEALTHY_THRESHOLD:
+        print(f"Alert! The air quality index (AQI) is {aqi}, which is considered unhealthy.")
+    else:
+        print(f"The air quality index (AQI) is {aqi}, which is safe.")
+
+def main():
+    while True:
+        aqi = get_air_quality(CITY, STATE, COUNTRY)
+        if aqi is not None:
+            alert_user(aqi)
+        else:
+            print("Could not retrieve AQI data.")
+        
+        # Check every hour
+        time.sleep(3600)
+
+if __name__ == "__main__":
+    main()
